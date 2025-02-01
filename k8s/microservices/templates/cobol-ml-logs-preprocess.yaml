@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cobolmllogspreprocess.name }}-cronjob
+  namespace: {{ .Values.cobolmllogspreprocess.namespace }}
+spec:
+  schedule: {{ .Values.cobolmllogspreprocess.schedule }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.cobolmlpostgresql.name }}-sa
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ .Values.cobolmllogspreprocess.name }}
+            image: "{{ .Values.cobolmllogspreprocess.image.repository }}:{{ .Values.cobolmllogspreprocess.image.tag }}"
+            imagePullPolicy: {{ .Values.cobolmllogspreprocess.image.pullPolicy }}
+            volumeMounts:
+            - name: s3-volume
+              mountPath: /logs
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+            env:
+            - name: POSTGRES_CONNECTION_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secret.name }}
+                  key: {{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}
+            - name: POSTGRES_DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secret.name }}
+                  key: {{ .Values.cobolmlpostgresql.secret.databaseNameKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secret.name }}
+                  key: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secret.name }}
+                  key: {{ .Values.cobolmlpostgresql.secret.userKey }}
+          volumes:
+          - name: secrets-store-inline
+            csi:
+              driver: secrets-store.csi.k8s.io
+              readOnly: true
+              volumeAttributes:
+                secretProviderClass: {{ .Values.cobolmlpostgresql.secretProviderClass.name }}
+          - name: s3-volume
+            persistentVolumeClaim:
+              claimName: {{ .Values.cobolmllogspreprocess.name }}-s3-pvc
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.cobolmllogspreprocess.name }}-s3-pv
+  namespace: {{ .Values.cobolmllogspreprocess.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.global.s3.storage.size }}
+  accessModes:
+{{ toYaml .Values.global.s3.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.s3.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.global.s3.storage.storageClassName }}
+  csi:
+    driver: s3.csi.aws.com
+    volumeHandle: s3-csi-{{ .Values.cobolmllogspreprocess.name }}-logs
+    volumeAttributes:
+      bucketName: {{ .Values.global.s3.bucketName }}
+      mounter: s3fs
+      csi.storage.k8s.io/nodePublishSecretName: ""
+      csi.storage.k8s.io/nodePublishSecretNamespace: ""
+      authType: "pod"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cobolmllogspreprocess.name }}-s3-pvc
+  namespace: {{ .Values.cobolmllogspreprocess.namespace }}
+spec:
+  accessModes:
+{{ toYaml .Values.global.s3.storage.accessModes | indent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.s3.storage.size }}
+  storageClassName: {{ .Values.global.s3.storage.storageClassName }}
+  volumeName: {{ .Values.cobolmllogspreprocess.name }}-s3-pv

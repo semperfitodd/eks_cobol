@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.cobolmlingestdata.name }}-pv
+  namespace: {{ .Values.cobolmlingestdata.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.global.efs_cobol_ml.storage.size }}
+  volumeMode: Filesystem
+  accessModes:
+{{ toYaml .Values.global.efs_cobol_ml.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.efs_cobol_ml.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.global.efs_cobol_ml.storage.storageClassName }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.global.efs_cobol_ml.volumeHandle }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cobolmlingestdata.name }}-pvc
+  namespace: {{ .Values.cobolmlingestdata.namespace }}
+spec:
+  accessModes:
+{{ toYaml .Values.global.efs_cobol_ml.storage.accessModes | indent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.efs_cobol_ml.storage.size }}
+  storageClassName: {{ .Values.global.efs_cobol_ml.storage.storageClassName }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cobolmlingestdata.name }}-cronjob
+  namespace: {{ .Values.cobolmlingestdata.namespace }}
+spec:
+  schedule: {{ .Values.cobolmlingestdata.schedule }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ .Values.cobolmlingestdata.name }}-container
+              image: "{{ .Values.cobolmlingestdata.image.repository }}:{{ .Values.cobolmlingestdata.image.tag }}"
+              imagePullPolicy: {{ .Values.cobolmlingestdata.image.pullPolicy }}
+              volumeMounts:
+                - name: efs-volume
+                  mountPath: /output
+                - name: s3-volume
+                  mountPath: /logs
+              resources:
+                requests:
+                  cpu: "{{ .Values.cobolmlingestdata.resources.requests.cpu }}"
+                  memory: "{{ .Values.cobolmlingestdata.resources.requests.memory }}"
+                limits:
+                  cpu: "{{ .Values.cobolmlingestdata.resources.limits.cpu }}"
+                  memory: "{{ .Values.cobolmlingestdata.resources.limits.memory }}"
+          volumes:
+            - name: efs-volume
+              persistentVolumeClaim:
+                claimName: {{ .Values.cobolmlingestdata.name }}-pvc
+            - name: s3-volume
+              persistentVolumeClaim:
+                claimName: {{ .Values.cobolmlingestdata.name }}-s3-pvc
+          nodeSelector:
+            gpu: {{ .Values.cobolmlingestdata.nodeSelector.gpu | quote }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.cobolmlingestdata.name }}-s3-pv
+  namespace: {{ .Values.cobolmlingestdata.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.global.s3.storage.size }}
+  accessModes:
+{{ toYaml .Values.global.s3.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.s3.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.global.s3.storage.storageClassName }}
+  csi:
+    driver: s3.csi.aws.com
+    volumeHandle: s3-csi-{{ .Values.cobolmlingestdata.name }}-logs
+    volumeAttributes:
+      bucketName: {{ .Values.global.s3.bucketName }}
+      mounter: s3fs
+      csi.storage.k8s.io/nodePublishSecretName: ""
+      csi.storage.k8s.io/nodePublishSecretNamespace: ""
+      authType: "pod"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cobolmlingestdata.name }}-s3-pvc
+  namespace: {{ .Values.cobolmlingestdata.namespace }}
+spec:
+  accessModes:
+{{ toYaml .Values.global.s3.storage.accessModes | indent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.s3.storage.size }}
+  storageClassName: {{ .Values.global.s3.storage.storageClassName }}
+  volumeName: {{ .Values.cobolmlingestdata.name }}-s3-pv

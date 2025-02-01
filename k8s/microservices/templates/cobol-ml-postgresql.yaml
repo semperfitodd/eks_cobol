@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.cobolmlpostgresql.name }}-sa
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.awsAccountNumber }}:role/{{ .Values.cobolmlpostgresql.iamRole.name }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cobolmlpostgresql.name }}-cronjob
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+spec:
+  schedule: {{ .Values.cobolmlpostgresql.schedule }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .Values.cobolmlpostgresql.name }}-sa
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ .Values.cobolmlpostgresql.name }}
+            image: "{{ .Values.cobolmlpostgresql.image.repository }}:{{ .Values.cobolmlpostgresql.image.tag }}"
+            imagePullPolicy: {{ .Values.cobolmlpostgresql.image.pullPolicy }}
+            volumeMounts:
+              - name: efs-volume
+                mountPath: /output
+              - name: s3-volume
+                mountPath: /logs
+              - name: secrets-store-inline
+                mountPath: "/mnt/secrets-store"
+                readOnly: true
+            env:
+              - name: POSTGRES_CONNECTION_ENDPOINT
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.secret.name }}
+                    key: {{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}
+              - name: POSTGRES_DATABASE_NAME
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.secret.name }}
+                    key: {{ .Values.cobolmlpostgresql.secret.databaseNameKey }}
+              - name: POSTGRES_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.secret.name }}
+                    key: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
+              - name: POSTGRES_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Values.global.secret.name }}
+                    key: {{ .Values.cobolmlpostgresql.secret.userKey }}
+          volumes:
+            - name: secrets-store-inline
+              csi:
+                driver: secrets-store.csi.k8s.io
+                readOnly: true
+                volumeAttributes:
+                  secretProviderClass: {{ .Values.cobolmlpostgresql.secretProviderClass.name }}
+            - name: efs-volume
+              persistentVolumeClaim:
+                claimName: {{ .Values.cobolmlpostgresql.name }}-pvc
+            - name: s3-volume
+              persistentVolumeClaim:
+                claimName: {{ .Values.cobolmlpostgresql.name }}-s3-pvc
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.cobolmlpostgresql.name }}-pv
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.global.efs_cobol_ml.storage.size }}
+  volumeMode: Filesystem
+  accessModes:
+{{ toYaml .Values.global.efs_cobol_ml.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.efs_cobol_ml.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.global.efs_cobol_ml.storage.storageClassName }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.global.efs_cobol_ml.volumeHandle }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cobolmlpostgresql.name }}-pvc
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+spec:
+  accessModes:
+{{ toYaml .Values.global.efs_cobol_ml.storage.accessModes | indent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.efs_cobol_ml.storage.size }}
+  storageClassName: {{ .Values.global.efs_cobol_ml.storage.storageClassName }}
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: {{ .Values.cobolmlpostgresql.secretProviderClass.name }}
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: {{ .Values.global.secret.name }}
+        objectType: secretsmanager
+        jmesPath:
+          - path: "connection_endpoint"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
+          - path: "database_name"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.databaseNameKey }}"
+          - path: "password"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
+          - path: "username"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
+  secretObjects:
+    - secretName: {{ .Values.global.secret.name }}
+      type: Opaque
+      data:
+        - objectName: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
+          key: connection_endpoint
+        - objectName: "{{ .Values.cobolmlpostgresql.secret.databaseNameKey }}"
+          key: database_name
+        - objectName: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
+          key: password
+        - objectName: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
+          key: username
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.cobolmlpostgresql.name }}-s3-pv
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.global.s3.storage.size }}
+  accessModes:
+{{ toYaml .Values.global.s3.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.s3.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.global.s3.storage.storageClassName }}
+  csi:
+    driver: s3.csi.aws.com
+    volumeHandle: s3-csi-{{ .Values.cobolmlpostgresql.name }}-logs
+    volumeAttributes:
+      bucketName: {{ .Values.global.s3.bucketName }}
+      mounter: s3fs
+      csi.storage.k8s.io/nodePublishSecretName: ""
+      csi.storage.k8s.io/nodePublishSecretNamespace: ""
+      authType: "pod"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cobolmlpostgresql.name }}-s3-pvc
+  namespace: {{ .Values.cobolmlpostgresql.namespace }}
+spec:
+  accessModes:
+{{ toYaml .Values.global.s3.storage.accessModes | indent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.s3.storage.size }}
+  storageClassName: {{ .Values.global.s3.storage.storageClassName }}
+  volumeName: {{ .Values.cobolmlpostgresql.name }}-s3-pv

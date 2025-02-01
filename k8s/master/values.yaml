@@ -1,0 +1,10 @@
+appEnvironments:
+  dev:
+    argoHostname: argocd-cobol.brewsentry.com
+    awsAccountNumber: '704855531002'
+    clusterName: eks-cobol
+    efsId: fs-033cec616c35aff95
+    environment: eks-cobol
+    publicDomain: brewsentry.com
+    publicDomainId: Z02805682TXYB0368277R
+    repoUrl: https://github.com/semperfitodd/eks_cobol.git

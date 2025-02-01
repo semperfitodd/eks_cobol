@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.cobolmlrawdata.namespace }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.cobolmlrawdata.name }}-pv
+  namespace: {{ .Values.cobolmlrawdata.namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.global.efs_cobol_ml.storage.size }}
+  volumeMode: Filesystem
+  accessModes:
+{{ toYaml .Values.global.efs_cobol_ml.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.global.efs_cobol_ml.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.global.efs_cobol_ml.storage.storageClassName }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.global.efs_cobol_ml.volumeHandle }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cobolmlrawdata.name }}-pvc
+  namespace: {{ .Values.cobolmlrawdata.namespace }}
+spec:
+  accessModes:
+{{ toYaml .Values.global.efs_cobol_ml.storage.accessModes | indent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.global.efs_cobol_ml.storage.size }}
+  storageClassName: {{ .Values.global.efs_cobol_ml.storage.storageClassName }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cobolmlrawdata.name }}-cronjob
+  namespace: {{ .Values.cobolmlrawdata.namespace }}
+spec:
+  schedule: {{ .Values.cobolmlrawdata.schedule }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ .Values.cobolmlrawdata.name }}-container
+              image: "{{ .Values.cobolmlrawdata.image.repository }}:{{ .Values.cobolmlrawdata.image.tag }}"
+              imagePullPolicy: {{ .Values.cobolmlrawdata.image.pullPolicy }}
+              volumeMounts:
+                - name: efs-volume
+                  mountPath: /output
+              resources:
+                requests:
+                  cpu: "{{ .Values.cobolmlrawdata.resources.requests.cpu }}"
+                  memory: "{{ .Values.cobolmlrawdata.resources.requests.memory }}"
+                limits:
+                  cpu: "{{ .Values.cobolmlrawdata.resources.limits.cpu }}"
+                  memory: "{{ .Values.cobolmlrawdata.resources.limits.memory }}"
+          volumes:
+            - name: efs-volume
+              persistentVolumeClaim:
+                claimName: {{ .Values.cobolmlrawdata.name }}-pvc
+          nodeSelector:
+            gpu: {{ .Values.cobolmlrawdata.nodeSelector.gpu | quote }}

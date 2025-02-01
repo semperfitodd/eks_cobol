@@ -1,0 +1,221 @@
+global:
+  efs_cobol_0:
+    storage:
+      size: 5Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: efs-sc
+    volumeHandle: fs-0fc5ab66fd9f3152c:/
+
+  efs_cobol_ml:
+    storage:
+      size: 5Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: efs-sc
+    volumeHandle: fs-09d89069bfa59f153:/
+
+  s3:
+    bucketName: eks-cobol-logs-hdb3f3
+    storage:
+      size: 100Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: s3-sc
+
+  secret:
+    name: eks-cobol-aurora-serverless-hdb3f3
+
+cobol0:
+  environment:
+    INPUT_FILE: /mnt/efs/input/orders.csv
+    OUTPUT_FILE: /mnt/efs/output/transformed_orders.txt
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
+    tag: "0"
+    pullPolicy: Always
+
+  name: cobol-0
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "0 * * * *"
+
+cobolmlingestdata:
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_ingestion"
+    tag: "0"
+    pullPolicy: Always
+
+  name: cobol-ml-ingest-data
+  namespace: cobol-ml
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "5 * * * *"
+
+cobolmllogspreprocess:
+  enabled: true
+  iamRole:
+    name: eks_cobol_secrets_csi
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_logs_preprocess"
+    tag: "1"
+    pullPolicy: Always
+
+  name: cobol-ml-logs-preprocess
+  namespace: cobol-ml
+
+  schedule: "30 * * * *"
+
+cobolmlpostgresql:
+  enabled: true
+  iamRole:
+    name: eks_cobol_secrets_csi
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_postgresql"
+    tag: "0"
+    pullPolicy: Always
+
+  name: cobol-ml-postgres
+  namespace: cobol-ml
+
+  schedule: "0 * * * *"
+
+  secret:
+    name: cobol-ml-postgres-secret
+    databaseNameKey: database_name
+    connectionEndpointKey: connection_endpoint
+    passwordKey: password
+    secretName: eks-cobol-aurora-serverless-yp84wh
+    userKey: username
+
+  secretProviderClass:
+    name: aws-secrets-provider
+
+cobolmlrawdata:
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_raw_generator"
+    tag: "0"
+    pullPolicy: Always
+
+  name: cobol-ml-raw-data
+  namespace: cobol-ml
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "5,20,35,50 * * * *"
+
+deepseek:
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/deepseek"
+    tag: "0"
+    pullPolicy: Always
+
+  name: deepseek
+  nodeSelector:
+    gpu: 'true'
+
+  replicaCount: 1
+
+  resources:
+    limits:
+      gpu: 1
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+      gpu: 1
+
+  service:
+    type: ClusterIP
+    port: 11434
+
+llm:
+  environment:
+    TRANSFORMED_FILE: "/mnt/efs/output/transformed_orders.txt"
+    LLM_TRANSFORMED_FILE: "/mnt/efs/output/llm_transformed_orders.txt"
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/llm"
+    tag: "0"
+    pullPolicy: Always
+
+  name: llm
+  nodeSelector:
+    gpu: "false"
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "0 * * * *"
+
+workercobol0:
+  name: cobol-0-worker
+  namespace: cobol-0
+  image:
+    repository: ubuntu
+    tag: "22.04"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+  nodeSelector:
+    gpu: "false"
+
+workercobolml:
+  name: cobol-ml-worker
+  namespace: cobol-ml
+  image:
+    repository: ubuntu
+    tag: "22.04"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+  nodeSelector:
+    gpu: "false"

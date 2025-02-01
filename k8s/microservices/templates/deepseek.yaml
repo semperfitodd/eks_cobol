@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.deepseek.name }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deepseek.name }}-deployment
+  namespace: {{ .Values.deepseek.name }}
+spec:
+  replicas: {{ .Values.deepseek.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deepseek.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deepseek.name }}
+    spec:
+      containers:
+        - name: {{ .Values.deepseek.name }}
+          image: "{{ .Values.deepseek.image.repository }}:{{ .Values.deepseek.image.tag }}"
+          imagePullPolicy: {{ .Values.deepseek.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.deepseek.service.port }}
+          resources:
+            limits:
+              nvidia.com/gpu: {{ .Values.deepseek.resources.limits.gpu }}
+            requests:
+              cpu: "{{ .Values.deepseek.resources.requests.cpu }}"
+              memory: "{{ .Values.deepseek.resources.requests.memory }}"
+              nvidia.com/gpu: {{ .Values.deepseek.resources.requests.gpu }}
+          securityContext:
+            privileged: true
+      nodeSelector:
+        gpu: {{ .Values.deepseek.nodeSelector.gpu | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.deepseek.name }}-service
+  namespace: {{ .Values.deepseek.name }}
+spec:
+  selector:
+    app: {{ .Values.deepseek.name }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.deepseek.service.port }}
+      targetPort: {{ .Values.deepseek.service.port }}
+  type: {{ .Values.deepseek.service.type }}
