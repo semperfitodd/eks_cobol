@@ -4,6 +4,6 @@ appEnvironments:
     awsAccountNumber: '704855531002'
     clusterName: eks-cobol
     environment: eks-cobol
-    publicDomain: eks-cobol.brewsentry.com
+    publicDomain: brewsentry.com
     publicDomainId: Z02805682TXYB0368277R
     repoUrl: https://github.com/semperfitodd/eks_cobol.git
