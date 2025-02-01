@@ -1,5 +1,28 @@
 data "aws_caller_identity" "this" {}
 
+data "aws_iam_policy_document" "eks_efs" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticfilesystem:ClientMount",
+      "elasticfilesystem:ClientRootAccess",
+      "elasticfilesystem:ClientWrite",
+    ]
+    resources = [module.efs_cobol_llm.arn]
+  }
+}
+
+data "aws_iam_policy_document" "eks_s3" {
+  statement {
+    effect = "Allow"
+    resources = [
+      module.s3_bucket_logs.s3_bucket_arn,
+      "${module.s3_bucket_logs.s3_bucket_arn}/*"
+    ]
+    actions = ["s3:*"]
+  }
+}
+
 data "aws_iam_policy_document" "external_dns" {
   statement {
     effect    = "Allow"
@@ -299,6 +322,22 @@ resource "aws_iam_policy" "eks_alb" {
       ]
       Version = "2012-10-17"
   })
+}
+
+resource "aws_iam_policy" "eks_efs" {
+  name = "${var.environment}_eks_efs"
+
+  policy = data.aws_iam_policy_document.eks_efs.json
+
+  tags = var.tags
+}
+
+resource "aws_iam_policy" "eks_s3" {
+  name = "${var.environment}_eks_s3"
+
+  policy = data.aws_iam_policy_document.eks_s3.json
+
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "external_dns" {

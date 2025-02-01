@@ -29,7 +29,7 @@ spec:
     server: https://kubernetes.default.svc
   project: microservices
   source:
-    path: k8s?microservices
+    path: k8s/microservices
     repoURL: {{ $values.repoUrl }}
     targetRevision: HEAD
     helm:

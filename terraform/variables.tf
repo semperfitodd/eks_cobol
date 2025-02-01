@@ -1,24 +1,3 @@
-variable "bedrock_embedding_llm_model_name" {
-  description = "Embedding LLM Model Name. LLM used with VectorDB"
-  type        = string
-
-  default = null
-}
-
-variable "bedrock_genai_llm_model_name" {
-  description = "LLM Model Name."
-  type        = string
-
-  default = null
-}
-
-variable "child_domains" {
-  description = "A list of child domains in the project"
-  type        = map(string)
-
-  default = {}
-}
-
 variable "domain" {
   description = "Base domain for the website"
   type        = string
@@ -42,6 +21,13 @@ variable "eks_cluster_version" {
 
 variable "eks_node_instance_type" {
   description = "EC2 instance type for worker nodes"
+  type        = string
+
+  default = null
+}
+
+variable "eks_node_gpu_instance_type" {
+  description = "EC2 instance type for GPU worker nodes"
   type        = string
 
   default = null
@@ -79,5 +65,5 @@ variable "vpc_redundancy" {
   description = "Redundancy for this VPCs NAT gateways"
   type        = bool
 
-  default = true
+  default = false
 }

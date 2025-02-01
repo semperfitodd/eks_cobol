@@ -1,10 +1,233 @@
-microservices:
-  - name: rfp-response-backend
-    image:
-      repository: 040848615584.dkr.ecr.us-east-1.amazonaws.com/ai_ml_shared_infra/rfp_response_backend
-      tag: 2025-01-20T19-39-44Z
-    namespace: rfp-response-backend
-    ports:
-      containerPort: 5000
-      servicePort: 80
-    replicas: 1
+cobol0:
+  environment:
+    INPUT_FILE: /mnt/efs/input/orders.csv
+    OUTPUT_FILE: /mnt/efs/output/transformed_orders.txt
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
+    tag: "2"
+    pullPolicy: Always
+
+  name: cobol-0
+
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "0 * * * *"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-033cec616c35aff95:/
+
+cobolmlingestdata:
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_cobol_ingestion"
+    tag: "14"
+    pullPolicy: Always
+
+  name: cobol-ml-ingest-data
+
+  namespace: cobol-ml
+
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  s3:
+    bucketName: eks-cobol-logs-730pkp
+    storage:
+      size: 100Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: s3-sc
+  schedule: "5 * * * *"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-0b11c021faf9e5922:/
+
+cobolmlpostgresql:
+  enabled: true
+  iamRole:
+    name: eks_cobol_secrets_csi
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_cobol_postgresql"
+    tag: "3"
+    pullPolicy: Always
+  name: cobol-ml-postgres
+  namespace: cobol-ml
+  s3:
+    bucketName: eks-cobol-logs-730pkp
+    storage:
+      size: 100Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: s3-sc
+  schedule: "0 */3 * * *"
+  secret:
+    name: cobol-ml-postgres-secret
+    databaseNameKey: database_name
+    connectionEndpointKey: connection_endpoint
+    passwordKey: password
+    secretName: eks-cobol-aurora-serverless
+    userKey: username
+  secretProviderClass:
+    name: aws-secrets-provider
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-0b11c021faf9e5922:/
+
+cobolmlrawdata:
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_raw_generator"
+    tag: "4"
+    pullPolicy: Always
+
+  name: cobol-ml-raw-data
+  namespace: cobol-ml
+
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "5,15,25,35,45,55 * * * *"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-0b11c021faf9e5922:/
+
+deepseek:
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/deepseek"
+    tag: "latest"
+    pullPolicy: Always
+
+  name: deepseek
+
+  nodeSelector:
+    gpu: 'true'
+
+  replicaCount: 1
+
+  resources:
+    limits:
+      gpu: 1
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+      gpu: 1
+  service:
+    type: ClusterIP
+    port: 11434
+
+llm:
+  environment:
+    TRANSFORMED_FILE: "/mnt/efs/output/transformed_orders.txt"
+    LLM_TRANSFOÚRMED_FILE: "/mnt/efs/output/llm_transformed_orders.txt"
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/llm"
+    tag: "1"
+    pullPolicy: Always
+
+  name: llm
+
+  nodeSelector:
+    gpu: "false"
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "0 * * * *"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-033cec616c35aff95:/
+
+worker:
+  name: ubuntu-worker
+
+  namespace: cobol-ml
+
+  image:
+    repository: ubuntu
+    tag: "22.04"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+
+  nodeSelector:
+    gpu: "false"
+
+  efs:
+    storage:
+      size: 5Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: efs-sc
+      volumeHandle: fs-0b11c021faf9e5922:/
+
+  s3:
+    bucketName: eks-cobol-logs-730pkp
+    storage:
+      size: 5Gi
+      accessModes:
+        - ReadWriteMany
+      reclaimPolicy: Retain
+      storageClassName: s3-sc
