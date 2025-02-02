@@ -53,14 +53,59 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  eks_managed_node_group_defaults = {
-    ami_type       = "AL2_x86_64"
-    instance_types = [var.eks_node_instance_type]
-  }
-
   eks_managed_node_groups = {
+    gpu_node_group = {
+      ami_type       = "AL2_x86_64_GPU"
+      instance_types = [var.eks_node_gpu_instance_type]
+
+      min_size     = 1
+      max_size     = 3
+      desired_size = 1
+
+      use_latest_ami_release_version = true
+
+      ebs_optimized     = true
+      enable_monitoring = true
+
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 75
+            volume_type           = "gp3"
+            encrypted             = true
+            delete_on_termination = true
+          }
+        }
+      }
+
+      taints = [
+        {
+          key    = "non_gpu"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
+
+      pre_bootstrap_user_data = <<-EOT
+        #!/bin/bash
+        set -ex
+
+        # Install dependencies
+        yum install -y cuda
+
+        # Add the NVIDIA package repositories
+        distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+        curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
+
+        # Install the NVIDIA container runtime
+        sudo yum install -y nvidia-container-toolkit
+      EOT
+    }
+
     node_group = {
-      ami_type = "AL2_x86_64"
+      ami_type       = "AL2_x86_64"
+      instance_types = [var.eks_node_instance_type]
 
       min_size     = 1
       max_size     = 5
@@ -82,6 +127,14 @@ module "eks" {
           }
         }
       }
+
+      taints = [
+        {
+          key    = "gpu"
+          value  = "true"
+          effect = "NO_SCHEDULE"
+        }
+      ]
 
       iam_role_additional_policies = {
         AmazonSSMManagedInstanceCore = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn

@@ -1,10 +1,20 @@
-#microservices:
-#  - name: rfp-response-backend
-#    image:
-#      repository: 040848615584.dkr.ecr.us-east-1.amazonaws.com/ai_ml_shared_infra/rfp_response_backend
-#      tag: 2025-01-20T19-39-44Z
-#    namespace: rfp-response-backend
-#    ports:
-#      containerPort: 5000
-#      servicePort: 80
-#    replicas: 1
+deepseek:
+  name: deepseek
+
+  replicaCount: 1
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/deepseek"
+    tag: "latest"
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 11434
+
+  resources:
+    limits:
+      nvidia.com/gpu: 1
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+      nvidia.com/gpu: 1
