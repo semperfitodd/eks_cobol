@@ -11,13 +11,12 @@ spec:
     targetRevision: 0.17.0
     helm:
       values: |
-        daemonset:
-          tolerations:
-            - key: "non_gpu"
-              operator: "Exists"
-              effect: "NoSchedule"
-          nodeSelector:
-            gpu: "true"
+        tolerations:
+          - key: "non_gpu"
+            operator: "Exists"
+            effect: "NoSchedule"
+        nodeSelector:
+          gpu: "true"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
