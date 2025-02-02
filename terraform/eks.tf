@@ -20,6 +20,10 @@ module "eks" {
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
       most_recent              = true
     }
+    aws-efs-csi-driver = {
+      service_account_role_arn = module.efs_csi_irsa_role.iam_role_arn
+      most_recent              = true
+    }
     coredns = {
       most_recent = true
     }
@@ -81,6 +85,7 @@ module "eks" {
 
       iam_role_additional_policies = {
         AmazonSSMManagedInstanceCore = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
+        eks_efs                      = aws_iam_policy.eks_efs.arn
       }
 
       tags = var.tags
@@ -98,6 +103,20 @@ module "ebs_csi_irsa_role" {
     ex = {
       provider_arn               = module.eks.oidc_provider_arn
       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
+
+module "efs_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name             = "${var.environment}_efs_csi"
+  attach_efs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["system:serviceaccount:kube-system:efs-csi-*"]
     }
   }
 }

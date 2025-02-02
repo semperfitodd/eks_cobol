@@ -1,5 +1,17 @@
 data "aws_caller_identity" "this" {}
 
+data "aws_iam_policy_document" "eks_efs" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "elasticfilesystem:ClientMount",
+      "elasticfilesystem:ClientRootAccess",
+      "elasticfilesystem:ClientWrite",
+    ]
+    resources = [module.efs.arn]
+  }
+}
+
 data "aws_iam_policy_document" "external_dns" {
   statement {
     effect    = "Allow"
@@ -299,6 +311,14 @@ resource "aws_iam_policy" "eks_alb" {
       ]
       Version = "2012-10-17"
   })
+}
+
+resource "aws_iam_policy" "eks_efs" {
+  name = "${var.environment}_eks_efs"
+
+  policy = data.aws_iam_policy_document.eks_efs.json
+
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "external_dns" {
