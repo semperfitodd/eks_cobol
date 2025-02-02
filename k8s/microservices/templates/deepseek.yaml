@@ -29,11 +29,11 @@ spec:
             privileged: true
       nodeSelector:
         gpu: "true"
-      tolerations:
-        - key: "non_gpu"
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
+{{/*      tolerations:*/}}
+{{/*        - key: "non_gpu"*/}}
+{{/*          operator: "Equal"*/}}
+{{/*          value: "true"*/}}
+{{/*          effect: "NoSchedule"*/}}
 
 ---
 apiVersion: v1
