@@ -13,8 +13,7 @@ spec:
       values: |
         tolerations:
           - key: "non_gpu"
-            operator: "Equal"
-            value: "true"
+            operator: "Exists"
             effect: "NoSchedule"
         nodeSelector:
           gpu: "true"
