@@ -87,6 +87,10 @@ module "eks" {
         }
       ]
 
+      labels = {
+        gpu = true
+      }
+
       pre_bootstrap_user_data = <<-EOT
         #!/bin/bash
         set -ex
@@ -135,6 +139,10 @@ module "eks" {
           effect = "NO_SCHEDULE"
         }
       ]
+
+      labels = {
+        gpu = false
+      }
 
       iam_role_additional_policies = {
         AmazonSSMManagedInstanceCore = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn

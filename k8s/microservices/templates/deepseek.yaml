@@ -30,7 +30,7 @@ spec:
       nodeSelector:
         gpu: "true"
       tolerations:
-        - key: "gpu"
+        - key: "non_gpu"
           operator: "Equal"
           value: "true"
           effect: "NoSchedule"
