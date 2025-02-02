@@ -20,11 +20,11 @@ spec:
             - containerPort: {{ .Values.deepseek.service.port }}
           resources:
             limits:
-              nvidia.com/gpu: {{ .Values.deepseek.resources.limits.nvidia.com.gpu }}
+              nvidia.com/gpu: {{ .Values.deepseek.resources.limits.gpu }}
             requests:
               cpu: "{{ .Values.deepseek.resources.requests.cpu }}"
               memory: "{{ .Values.deepseek.resources.requests.memory }}"
-              nvidia.com/gpu: {{ .Values.deepseek.resources.requests.nvidia.com.gpu }}
+              nvidia.com/gpu: {{ .Values.deepseek.resources.requests.gpu }}
           securityContext:
             privileged: true
       nodeSelector:
