@@ -79,14 +79,6 @@ module "eks" {
         }
       }
 
-      taints = [
-        {
-          key    = "non_gpu"
-          value  = "true"
-          effect = "NO_SCHEDULE"
-        }
-      ]
-
       labels = {
         gpu = true
       }
@@ -131,14 +123,6 @@ module "eks" {
           }
         }
       }
-
-      taints = [
-        {
-          key    = "gpu"
-          value  = "true"
-          effect = "NO_SCHEDULE"
-        }
-      ]
 
       labels = {
         gpu = false
