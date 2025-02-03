@@ -1,6 +1,5 @@
-cobol_0:
-  name: cobol-transform
-  namespace: cobol-transform
+cobol-0:
+  name: cobol-0
   replicaCount: 1
 
   image:
