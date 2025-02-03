@@ -4,7 +4,7 @@ cobol0:
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
-    tag: "1"
+    tag: "2"
     pullPolicy: Always
 
   nodeSelector:
