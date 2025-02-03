@@ -4,6 +4,7 @@ ecr_repos = {
   cobol_0  = "cobol_0",
   cobol_1  = "cobol_1",
   deepseek = "deepseek",
+  llm      = "llm"
 }
 
 eks_cluster_version = "1.32"

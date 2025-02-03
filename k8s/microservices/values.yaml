@@ -1,6 +1,5 @@
 cobol0:
   name: cobol-0
-  replicaCount: 1
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
@@ -53,3 +52,36 @@ deepseek:
       cpu: "1"
       memory: "2Gi"
       gpu: 1
+
+llm:
+  name: llm
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/llm"
+    tag: "latest"
+    pullPolicy: Always
+
+  nodeSelector:
+    gpu: "false"
+
+  schedule: "* * * * *"
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-033cec616c35aff95:/
+
+  environment:
+    TRANSFORMED_FILE: "/mnt/efs/output/transformed_orders.txt"
+    LLM_TRANSFORMED_FILE: "/mnt/efs/output/llm_transformed_orders.txt"
