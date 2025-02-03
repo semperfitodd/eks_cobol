@@ -40,6 +40,7 @@ metadata:
   namespace: {{ .Values.cobol0.name }}
 spec:
   schedule: "* * * * *"
+  concurrencyPolicy: Replace
   jobTemplate:
     spec:
       template:

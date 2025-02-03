@@ -2,7 +2,6 @@ domain = "brewsentry.com"
 
 ecr_repos = {
   cobol_0  = "cobol_0",
-  cobol_1  = "cobol_1",
   deepseek = "deepseek",
   llm      = "llm"
 }
