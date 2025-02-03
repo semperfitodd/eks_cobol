@@ -81,6 +81,7 @@ module "eks" {
 
       labels = {
         gpu = true
+       "nvidia.com/gpu.present" = true
       }
 
       pre_bootstrap_user_data = <<-EOT

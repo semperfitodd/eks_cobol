@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-033cec616c35aff95:/
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: efs-sc
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cobol-transform-pod
+spec:
+  containers:
+    - name: cobol-transform-container
+      image: cobol-transform:latest
+      env:
+        - name: INPUT_FILE
+          value: /mnt/efs/input/orders.csv
+        - name: OUTPUT_FILE
+          value: /mnt/efs/output/transformed_orders.txt
+      volumeMounts:
+        - name: efs-volume
+          mountPath: /mnt/efs
+  volumes:
+    - name: efs-volume
+      persistentVolumeClaim:
+        claimName: efs-pvc
+  podSelector:
+    {{ .Values.deepseek.nodeSelector }}

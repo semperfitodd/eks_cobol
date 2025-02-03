@@ -34,7 +34,7 @@ spec:
           securityContext:
             privileged: true
       nodeSelector:
-        gpu: "true"
+        {{ .Values.deepseek.nodeSelector }}
 
 ---
 apiVersion: v1

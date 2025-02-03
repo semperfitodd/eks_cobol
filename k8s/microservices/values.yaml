@@ -1,3 +1,36 @@
+cobol_0:
+  name: cobol-transform
+  namespace: cobol-transform
+  replicaCount: 1
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
+    tag: "latest"
+    pullPolicy: Always
+
+  nodeSelector:
+    gpu: "false"
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-033cec616c35aff95:/
+
+  environment:
+    INPUT_FILE: /mnt/efs/input/orders.csv
+    OUTPUT_FILE: /mnt/efs/output/transformed_orders.txt
+
 deepseek:
   name: deepseek
 
@@ -10,6 +43,9 @@ deepseek:
   service:
     type: ClusterIP
     port: 11434
+
+  nodeSelector:
+    gpu: "true"
 
   resources:
     limits:
