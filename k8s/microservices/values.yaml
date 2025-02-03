@@ -58,7 +58,7 @@ llm:
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/llm"
-    tag: "latest"
+    tag: "0"
     pullPolicy: Always
 
   nodeSelector:
