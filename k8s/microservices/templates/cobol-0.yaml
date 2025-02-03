@@ -63,4 +63,4 @@ spec:
       persistentVolumeClaim:
         claimName: {{ .Values.cobol0.name }}-pvc
   nodeSelector:
-    gpu: {{ .Values.cobol0.nodeSelector.gpu }}
+    gpu: {{ .Values.cobol0.nodeSelector.gpu | quote }}
