@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -x
 
 if [ -z "$INPUT_FILE" ] || [ -z "$OUTPUT_FILE" ]; then
   echo "Error: INPUT_FILE and OUTPUT_FILE environment variables must be set."

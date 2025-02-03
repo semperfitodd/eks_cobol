@@ -17,7 +17,7 @@
            05 Comma1               PIC X.
            05 CustomerName         PIC X(20).
            05 Comma2               PIC X.
-           05 AddressField         PIC X(20).  * Renamed to avoid conflict with reserved words
+           05 AddressField         PIC X(20).
            05 Comma3               PIC X.
            05 Item                 PIC X(10).
            05 Comma4               PIC X.
@@ -26,19 +26,19 @@
            05 PurchaseFrequency    PIC X(2).
 
        FD OutputFile.
-       01 OutputRecord            PIC X(100). * Increased size for safety
+       01 OutputRecord            PIC X(100).
 
        WORKING-STORAGE SECTION.
-       01 WS-EOF                  PIC X VALUE "N".
+       01 WS-EOF                  PIC X VALUE 'N'.
 
        PROCEDURE DIVISION.
        MainSection.
            OPEN INPUT InputFile
            OPEN OUTPUT OutputFile
-           PERFORM UNTIL WS-EOF = "Y"
-               READ InputFile INTO InputRecord
+           PERFORM UNTIL WS-EOF = 'Y'
+               READ InputFile
                    AT END
-                       MOVE "Y" TO WS-EOF
+                       MOVE 'Y' TO WS-EOF
                    NOT AT END
                        PERFORM TransformRecord
                END-READ
@@ -59,4 +59,3 @@
               ON OVERFLOW DISPLAY "Error writing record."
            END-STRING
            WRITE OutputRecord.
-
