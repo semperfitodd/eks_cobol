@@ -37,7 +37,7 @@ def read_input_file(filepath):
         return f.read().strip()
 
 def process_with_llm(input_text):
-    url = "http://deepseek-service.deepseek.svc.cluster.local/api/generate"
+    url = "http://deepseek-service.deepseek.svc.cluster.local:11434/api/generate"
     payload = {
         "model": "deepseek-r1:7b",
         "prompt": PROMPT + input_text,
