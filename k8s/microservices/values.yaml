@@ -8,7 +8,7 @@ cobol0:
     pullPolicy: Always
 
   nodeSelector:
-    gpu: "false"
+    gpu: 'false'
 
   resources:
     requests:
@@ -44,7 +44,7 @@ deepseek:
     port: 11434
 
   nodeSelector:
-    gpu: "true"
+    gpu: 'true'
 
   resources:
     limits:
