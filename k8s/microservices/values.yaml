@@ -1,4 +1,4 @@
-cobol-0:
+cobol0:
   name: cobol-0
   replicaCount: 1
 
