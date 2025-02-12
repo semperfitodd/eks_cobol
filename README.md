@@ -109,4 +109,3 @@ A Kubernetes CronJob in `docker/cobol_0`:
     ![argo_llm_file_processing.png](img/argo_llm_file_processing.png)
   
     ![llm_deployment.png](img/llm_deployment.png)
-

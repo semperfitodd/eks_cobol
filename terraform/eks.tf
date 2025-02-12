@@ -105,7 +105,7 @@ module "eks" {
       instance_types = [var.eks_node_instance_type]
 
       min_size     = 1
-      max_size     = 5
+      max_size     = 3
       desired_size = 1
 
       use_latest_ami_release_version = true
