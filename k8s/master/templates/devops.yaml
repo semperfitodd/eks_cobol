@@ -16,6 +16,7 @@ spec:
     - https://argoproj.github.io/argo-helm
     - https://aws.github.io/eks-charts
     - https://charts.bitnami.com/bitnami
+    - oci://registry-1.docker.io/bitnamicharts
     - https://charts.jetstack.io/
     - https://nvidia.github.io/k8s-device-plugin
     - {{ $values.repoUrl }}
