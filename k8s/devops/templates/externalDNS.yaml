@@ -32,8 +32,8 @@ spec:
           value: upsert-only
         - name: serviceAccount.annotations.eks\.amazonaws\.com/role-arn
           value: arn:aws:iam::{{ .Values.awsAccountNumber }}:role/{{ .Values.environment }}-AmazonEKSRoute53ExternalDNS
-    repoURL: oci://registry-1.docker.io/bitnamicharts
-    targetRevision: 8.7.4
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: 7.5.5
   syncPolicy:
     automated:
       prune: true
