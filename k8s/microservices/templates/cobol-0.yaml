@@ -39,7 +39,7 @@ metadata:
   name: {{ .Values.cobol0.name }}-cronjob
   namespace: {{ .Values.cobol0.name }}
 spec:
-  schedule: "* * * * *"
+  schedule: {{ .Values.cobol0.schedule }}
   concurrencyPolicy: Replace
   jobTemplate:
     spec:

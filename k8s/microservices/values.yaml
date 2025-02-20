@@ -17,6 +17,8 @@ cobol0:
       cpu: "1"
       memory: "2Gi"
 
+  schedule: "0 * * * *"
+
   storage:
     size: 5Gi
     accessModes:
@@ -64,7 +66,7 @@ llm:
   nodeSelector:
     gpu: "false"
 
-  schedule: "* * * * *"
+  schedule: "0 * * * *"
 
   resources:
     requests:
