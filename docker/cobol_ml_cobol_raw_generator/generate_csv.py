@@ -44,7 +44,7 @@ def generate_csv(file_name, num_rows):
 
 
 if __name__ == '__main__':
-    file_name = '/output/large_transactions.csv'
+    file_name = '/output/raw-data/raw-transactions.csv'
     num_rows = 25000000
     generate_csv(file_name, num_rows)
     print(f'CSV file "{file_name}" with {num_rows} rows created successfully!')
