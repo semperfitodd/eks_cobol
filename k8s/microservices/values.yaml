@@ -34,6 +34,24 @@ cobol0:
 cobolml:
   name: cobol-ml
 
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
+    tag: "0"
+    pullPolicy: Always
+
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "0 2 * * *"
+
   storage:
     size: 5Gi
     accessModes:
@@ -41,7 +59,6 @@ cobolml:
     reclaimPolicy: Retain
     storageClassName: efs-sc
     volumeHandle: fs-0b11c021faf9e5922:/
-
 
 deepseek:
   name: deepseek

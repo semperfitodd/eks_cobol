@@ -33,42 +33,37 @@ spec:
       storage: {{ .Values.cobolml.storage.size }}
   storageClassName: {{ .Values.cobolml.storage.storageClassName }}
 ---
-{{/*apiVersion: batch/v1*/}}
-{{/*kind: CronJob*/}}
-{{/*metadata:*/}}
-{{/*  name: {{ .Values.cobolml.name }}-cronjob*/}}
-{{/*  namespace: {{ .Values.cobolml.name }}*/}}
-{{/*spec:*/}}
-{{/*  schedule: {{ .Values.cobolml.schedule }}*/}}
-{{/*  concurrencyPolicy: Replace*/}}
-{{/*  jobTemplate:*/}}
-{{/*    spec:*/}}
-{{/*      template:*/}}
-{{/*        spec:*/}}
-{{/*          restartPolicy: Never*/}}
-{{/*          activeDeadlineSeconds: 30*/}}
-{{/*          containers:*/}}
-{{/*            - name: {{ .Values.cobolml.name }}-container*/}}
-{{/*              image: "{{ .Values.cobolml.image.repository }}:{{ .Values.cobolml.image.tag }}"*/}}
-{{/*              imagePullPolicy: {{ .Values.cobolml.image.pullPolicy }}*/}}
-{{/*              env:*/}}
-{{/*                - name: INPUT_FILE*/}}
-{{/*                  value: "{{ .Values.cobolml.environment.INPUT_FILE }}"*/}}
-{{/*                - name: OUTPUT_FILE*/}}
-{{/*                  value: "{{ .Values.cobolml.environment.OUTPUT_FILE }}"*/}}
-{{/*              volumeMounts:*/}}
-{{/*                - name: efs-volume*/}}
-{{/*                  mountPath: /mnt/efs*/}}
-{{/*              resources:*/}}
-{{/*                requests:*/}}
-{{/*                  cpu: "{{ .Values.cobolml.resources.requests.cpu }}"*/}}
-{{/*                  memory: "{{ .Values.cobolml.resources.requests.memory }}"*/}}
-{{/*                limits:*/}}
-{{/*                  cpu: "{{ .Values.cobolml.resources.limits.cpu }}"*/}}
-{{/*                  memory: "{{ .Values.cobolml.resources.limits.memory }}"*/}}
-{{/*          volumes:*/}}
-{{/*            - name: efs-volume*/}}
-{{/*              persistentVolumeClaim:*/}}
-{{/*                claimName: {{ .Values.cobolml.name }}-pvc*/}}
-{{/*          nodeSelector:*/}}
-{{/*            gpu: {{ .Values.cobolml.nodeSelector.gpu | quote }}*/}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cobolml.name }}-cronjob
+  namespace: {{ .Values.cobolml.name }}
+spec:
+  schedule: {{ .Values.cobolml.schedule }}
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          activeDeadlineSeconds: 30
+          containers:
+            - name: {{ .Values.cobolml.name }}-container
+              image: "{{ .Values.cobolml.image.repository }}:{{ .Values.cobolml.image.tag }}"
+              imagePullPolicy: {{ .Values.cobolml.image.pullPolicy }}
+              volumeMounts:
+                - name: efs-volume
+                  mountPath: /output
+              resources:
+                requests:
+                  cpu: "{{ .Values.cobolml.resources.requests.cpu }}"
+                  memory: "{{ .Values.cobolml.resources.requests.memory }}"
+                limits:
+                  cpu: "{{ .Values.cobolml.resources.limits.cpu }}"
+                  memory: "{{ .Values.cobolml.resources.limits.memory }}"
+          volumes:
+            - name: efs-volume
+              persistentVolumeClaim:
+                claimName: {{ .Values.cobolml.name }}-pvc
+          nodeSelector:
+            gpu: {{ .Values.cobolml.nodeSelector.gpu | quote }}
