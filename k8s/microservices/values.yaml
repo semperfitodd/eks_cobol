@@ -35,7 +35,7 @@ cobolml:
   name: cobol-ml
 
   image:
-    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_0"
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_raw_generator"
     tag: "0"
     pullPolicy: Always
 
