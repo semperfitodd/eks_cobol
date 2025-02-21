@@ -46,7 +46,6 @@ spec:
       template:
         spec:
           restartPolicy: Never
-          activeDeadlineSeconds: 30
           containers:
             - name: {{ .Values.cobolml.name }}-container
               image: "{{ .Values.cobolml.image.repository }}:{{ .Values.cobolml.image.tag }}"
