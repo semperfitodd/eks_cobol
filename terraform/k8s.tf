@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "eks_efs" {
       "elasticfilesystem:ClientRootAccess",
       "elasticfilesystem:ClientWrite",
     ]
-    resources = [module.efs.arn]
+    resources = [module.efs_cobol_llm.arn]
   }
 }
 

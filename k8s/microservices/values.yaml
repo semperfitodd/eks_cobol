@@ -31,6 +31,18 @@ cobol0:
     INPUT_FILE: /mnt/efs/input/orders.csv
     OUTPUT_FILE: /mnt/efs/output/transformed_orders.txt
 
+cobolml:
+  name: cobol-ml
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-0b11c021faf9e5922:/
+
+
 deepseek:
   name: deepseek
 
