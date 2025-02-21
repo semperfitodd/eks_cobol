@@ -46,7 +46,6 @@ spec:
       template:
         spec:
           restartPolicy: Never
-          activeDeadlineSeconds: 30
           containers:
             - name: {{ .Values.llm.name }}-container
               image: "{{ .Values.llm.image.repository }}:{{ .Values.llm.image.tag }}"
