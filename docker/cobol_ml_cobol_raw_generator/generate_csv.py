@@ -38,12 +38,16 @@ def generate_transaction():
 def generate_csv(file_name):
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
+    target_size = random.randint(100 * 1024 * 1024, 1024 * 1024 * 1024)
+
     with open(file_name, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['Date', 'Transaction Type', 'Description', 'Amount'])
 
-        while os.path.getsize(file_name) < 100 * 1024 * 1024:
+        while os.path.getsize(file_name) < target_size:
             writer.writerow(generate_transaction())
+
+    print(f'CSV file "{file_name}" created successfully with a size of {os.path.getsize(file_name) / (1024 * 1024):.2f} MB!')
 
 
 if __name__ == '__main__':
@@ -51,7 +55,4 @@ if __name__ == '__main__':
     current_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
     file_name = os.path.join(output_directory, f'raw-data-{current_time}.csv')
 
-    # Generate the CSV file
     generate_csv(file_name)
-
-    print(f'CSV file "{file_name}" created successfully with a size between 100MB and 1GB!')
