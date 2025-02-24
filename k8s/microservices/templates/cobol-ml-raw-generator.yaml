@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Values.cobolmlrawdata.name }}
+  name: {{ .Values.cobolmlrawdata.namespace }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: {{ .Values.cobolmlrawdata.name }}-pv
-  namespace: {{ .Values.cobolmlrawdata.name }}
+  namespace: {{ .Values.cobolmlrawdata.namespace }}
 spec:
   capacity:
     storage: {{ .Values.cobolmlrawdata.storage.size }}
@@ -24,7 +24,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Values.cobolmlrawdata.name }}-pvc
-  namespace: {{ .Values.cobolmlrawdata.name }}
+  namespace: {{ .Values.cobolmlrawdata.namespace }}
 spec:
   accessModes:
 {{ toYaml .Values.cobolmlrawdata.storage.accessModes | indent 4 }}
@@ -37,7 +37,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ .Values.cobolmlrawdata.name }}-cronjob
-  namespace: {{ .Values.cobolmlrawdata.name }}
+  namespace: {{ .Values.cobolmlrawdata.namespace }}
 spec:
   schedule: {{ .Values.cobolmlrawdata.schedule }}
   concurrencyPolicy: Replace

@@ -31,8 +31,39 @@ cobol0:
     INPUT_FILE: /mnt/efs/input/orders.csv
     OUTPUT_FILE: /mnt/efs/output/transformed_orders.txt
 
+cobolmlingestdata:
+  name: cobol-ml-ingest-data
+  namespace: cobol-ml
+
+  image:
+    repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_ingestion"
+    tag: "1"
+    pullPolicy: Always
+
+  nodeSelector:
+    gpu: 'false'
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+  schedule: "5 * * * *"
+
+  storage:
+    size: 5Gi
+    accessModes:
+      - ReadWriteMany
+    reclaimPolicy: Retain
+    storageClassName: efs-sc
+    volumeHandle: fs-0b11c021faf9e5922:/
+
 cobolmlrawdata:
   name: cobol-ml-raw-data
+  namespace: cobolml
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_raw_generator"
@@ -50,7 +81,7 @@ cobolmlrawdata:
       cpu: "1"
       memory: "2Gi"
 
-  schedule: "0,30 * * * *"
+  schedule: "0,10,20,30,40,50 * * * *"
 
   storage:
     size: 5Gi
