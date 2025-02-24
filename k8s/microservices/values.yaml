@@ -63,7 +63,7 @@ cobolmlingestdata:
 
 cobolmlrawdata:
   name: cobol-ml-raw-data
-  namespace: cobolml
+  namespace: cobol-ml
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_raw_generator"
