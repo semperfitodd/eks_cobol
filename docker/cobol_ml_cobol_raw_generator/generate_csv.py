@@ -3,10 +3,12 @@ import random
 from datetime import datetime, timedelta
 import os
 
+
 def random_date(start, end):
     delta = end - start
     random_days = random.randint(0, delta.days)
     return start + timedelta(days=random_days)
+
 
 def generate_transaction():
     transaction_types = {
@@ -32,7 +34,10 @@ def generate_transaction():
 
     return [date, transaction_type, description, amount]
 
+
 def generate_csv(file_name):
+    os.makedirs(os.path.dirname(file_name), exist_ok=True)
+
     with open(file_name, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['Date', 'Transaction Type', 'Description', 'Amount'])
@@ -40,8 +45,13 @@ def generate_csv(file_name):
         while os.path.getsize(file_name) < 100 * 1024 * 1024:
             writer.writerow(generate_transaction())
 
+
 if __name__ == '__main__':
+    output_directory = '/output/raw-data/'
     current_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    file_name = f'raw-data-{current_time}.csv'
+    file_name = os.path.join(output_directory, f'raw-data-{current_time}.csv')
+
+    # Generate the CSV file
     generate_csv(file_name)
+
     print(f'CSV file "{file_name}" created successfully with a size between 100MB and 1GB!')

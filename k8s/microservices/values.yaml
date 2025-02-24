@@ -36,7 +36,7 @@ cobolmlrawdata:
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_raw_generator"
-    tag: "2"
+    tag: "3"
     pullPolicy: Always
 
   nodeSelector:
