@@ -50,7 +50,7 @@ cobolmlrawdata:
       cpu: "1"
       memory: "2Gi"
 
-  schedule: "30 * * * *"
+  schedule: "0,30 * * * *"
 
   storage:
     size: 5Gi
