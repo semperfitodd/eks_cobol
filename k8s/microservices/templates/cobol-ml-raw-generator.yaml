@@ -1,45 +1,45 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Values.cobolml.name }}
+  name: {{ .Values.cobolmlrawdata.name }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Values.cobolml.name }}-pv
-  namespace: {{ .Values.cobolml.name }}
+  name: {{ .Values.cobolmlrawdata.name }}-pv
+  namespace: {{ .Values.cobolmlrawdata.name }}
 spec:
   capacity:
-    storage: {{ .Values.cobolml.storage.size }}
+    storage: {{ .Values.cobolmlrawdata.storage.size }}
   volumeMode: Filesystem
   accessModes:
-{{ toYaml .Values.cobolml.storage.accessModes | indent 4 }}
-  persistentVolumeReclaimPolicy: {{ .Values.cobolml.storage.reclaimPolicy }}
-  storageClassName: {{ .Values.cobolml.storage.storageClassName }}
+{{ toYaml .Values.cobolmlrawdata.storage.accessModes | indent 4 }}
+  persistentVolumeReclaimPolicy: {{ .Values.cobolmlrawdata.storage.reclaimPolicy }}
+  storageClassName: {{ .Values.cobolmlrawdata.storage.storageClassName }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.cobolml.storage.volumeHandle }}
+    volumeHandle: {{ .Values.cobolmlrawdata.storage.volumeHandle }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.cobolml.name }}-pvc
-  namespace: {{ .Values.cobolml.name }}
+  name: {{ .Values.cobolmlrawdata.name }}-pvc
+  namespace: {{ .Values.cobolmlrawdata.name }}
 spec:
   accessModes:
-{{ toYaml .Values.cobolml.storage.accessModes | indent 4 }}
+{{ toYaml .Values.cobolmlrawdata.storage.accessModes | indent 4 }}
   resources:
     requests:
-      storage: {{ .Values.cobolml.storage.size }}
-  storageClassName: {{ .Values.cobolml.storage.storageClassName }}
+      storage: {{ .Values.cobolmlrawdata.storage.size }}
+  storageClassName: {{ .Values.cobolmlrawdata.storage.storageClassName }}
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cobolml.name }}-cronjob
-  namespace: {{ .Values.cobolml.name }}
+  name: {{ .Values.cobolmlrawdata.name }}-cronjob
+  namespace: {{ .Values.cobolmlrawdata.name }}
 spec:
-  schedule: {{ .Values.cobolml.schedule }}
+  schedule: {{ .Values.cobolmlrawdata.schedule }}
   concurrencyPolicy: Replace
   jobTemplate:
     spec:
@@ -47,22 +47,22 @@ spec:
         spec:
           restartPolicy: Never
           containers:
-            - name: {{ .Values.cobolml.name }}-container
-              image: "{{ .Values.cobolml.image.repository }}:{{ .Values.cobolml.image.tag }}"
-              imagePullPolicy: {{ .Values.cobolml.image.pullPolicy }}
+            - name: {{ .Values.cobolmlrawdata.name }}-container
+              image: "{{ .Values.cobolmlrawdata.image.repository }}:{{ .Values.cobolmlrawdata.image.tag }}"
+              imagePullPolicy: {{ .Values.cobolmlrawdata.image.pullPolicy }}
               volumeMounts:
                 - name: efs-volume
                   mountPath: /output
               resources:
                 requests:
-                  cpu: "{{ .Values.cobolml.resources.requests.cpu }}"
-                  memory: "{{ .Values.cobolml.resources.requests.memory }}"
+                  cpu: "{{ .Values.cobolmlrawdata.resources.requests.cpu }}"
+                  memory: "{{ .Values.cobolmlrawdata.resources.requests.memory }}"
                 limits:
-                  cpu: "{{ .Values.cobolml.resources.limits.cpu }}"
-                  memory: "{{ .Values.cobolml.resources.limits.memory }}"
+                  cpu: "{{ .Values.cobolmlrawdata.resources.limits.cpu }}"
+                  memory: "{{ .Values.cobolmlrawdata.resources.limits.memory }}"
           volumes:
             - name: efs-volume
               persistentVolumeClaim:
-                claimName: {{ .Values.cobolml.name }}-pvc
+                claimName: {{ .Values.cobolmlrawdata.name }}-pvc
           nodeSelector:
-            gpu: {{ .Values.cobolml.nodeSelector.gpu | quote }}
+            gpu: {{ .Values.cobolmlrawdata.nodeSelector.gpu | quote }}
