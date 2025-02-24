@@ -1,13 +1,12 @@
 import csv
 import random
 from datetime import datetime, timedelta
-
+import os
 
 def random_date(start, end):
     delta = end - start
     random_days = random.randint(0, delta.days)
     return start + timedelta(days=random_days)
-
 
 def generate_transaction():
     transaction_types = {
@@ -33,18 +32,16 @@ def generate_transaction():
 
     return [date, transaction_type, description, amount]
 
-
-def generate_csv(file_name, num_rows):
+def generate_csv(file_name):
     with open(file_name, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['Date', 'Transaction Type', 'Description', 'Amount'])
 
-        for _ in range(num_rows):
+        while os.path.getsize(file_name) < 100 * 1024 * 1024:
             writer.writerow(generate_transaction())
 
-
 if __name__ == '__main__':
-    file_name = '/output/raw-data/raw-transactions.csv'
-    num_rows = 25000000
-    generate_csv(file_name, num_rows)
-    print(f'CSV file "{file_name}" with {num_rows} rows created successfully!')
+    current_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    file_name = f'raw-data-{current_time}.csv'
+    generate_csv(file_name)
+    print(f'CSV file "{file_name}" created successfully with a size between 100MB and 1GB!')
