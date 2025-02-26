@@ -37,7 +37,7 @@ cobolmlingestdata:
 
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_cobol_ingestion"
-    tag: "3"
+    tag: "4"
     pullPolicy: Always
 
   nodeSelector:

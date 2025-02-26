@@ -31,12 +31,16 @@
        01  WS-CLEANUP-EOF PIC X VALUE 'N'.
        01  WS-DELIMITER PIC X VALUE ','.
        01  WS-TAB PIC X VALUE '    '.
-       01  WS-FIELD1 PIC X(100).
-       01  WS-FIELD2 PIC X(100).
-       01  WS-FIELD3 PIC X(200).
-       01  WS-FIELD4 PIC X(50).
-       01  VALID-DATE      PIC X VALUE 'N'.
-       01  VALID-AMOUNT    PIC X VALUE 'N'.
+
+       *> Fields extracted from the CSV record
+       01  WS-FIELD1 PIC X(10). *> Date (YYYY-MM-DD)
+       01  WS-FIELD2 PIC X(100). *> Transaction Type
+       01  WS-FIELD3 PIC X(200). *> Description
+       01  WS-FIELD4 PIC X(50). *> Amount
+
+       *> Validation flags
+       01 VALID-DATE      PIC X VALUE 'N'.
+       01 VALID-AMOUNT    PIC X VALUE 'N'.
 
        PROCEDURE DIVISION.
 
@@ -98,6 +102,7 @@
                        IF FUNCTION TRIM(WS-TEMP) = "Date,Transaction Type,Description,Amount"
                            CONTINUE *> Skip header row
                        ELSE
+                           PERFORM PARSE-COLUMNS *> Extract fields from the record
                            PERFORM VALIDATE-DATA
                            IF VALID-DATE = 'Y' AND VALID-AMOUNT = 'Y'
                                PERFORM CONVERT-CSV-TO-TSV
@@ -110,32 +115,47 @@
 
            CLOSE CSV-FILE CLEAN-FILE.
 
+       PARSE-COLUMNS.
+           UNSTRING WS-TEMP DELIMITED BY WS-DELIMITER
+               INTO WS-FIELD1, WS-FIELD2, WS-FIELD3, WS-FIELD4.
+
        VALIDATE-DATA.
+           *> Validate Date (YYYY-MM-DD format)
            IF FUNCTION LENGTH(FUNCTION TRIM(WS-FIELD1)) = 10 AND
-              FUNCTION NUMVAL-C(FUNCTION TRIM(WS-FIELD1)) > ZERO AND
               WS-FIELD1(5:1) = "-" AND
-              WS-FIELD1(8:1) = "-"
+              WS-FIELD1(8:1) = "-" AND
+              WS-FIELD1(1:4) IS NUMERIC AND
+              WS-FIELD1(6:2) IS NUMERIC AND
+              WS-FIELD1(9:2) IS NUMERIC
                MOVE 'Y' TO VALID-DATE
            ELSE
                MOVE 'N' TO VALID-DATE
+               DISPLAY "Invalid Date: " FUNCTION TRIM(WS-FIELD1)
            END-IF
 
+           *> Validate Amount (numeric with decimals and signs)
            IF FUNCTION NUMVAL-C(FUNCTION TRIM(WS-FIELD4)) NOT = ZERO OR
               FUNCTION TRIM(WS-FIELD4) = "0"
                MOVE 'Y' TO VALID-AMOUNT
            ELSE
                MOVE 'N' TO VALID-AMOUNT
+               DISPLAY "Invalid Amount: " FUNCTION TRIM(WS-FIELD4)
            END-IF.
 
        CONVERT-CSV-TO-TSV.
-           UNSTRING WS-TEMP DELIMITED BY WS-DELIMITER
-               INTO WS-FIELD1, WS-FIELD2, WS-FIELD3, WS-FIELD4
+           *> Clear CLEAN-RECORD to avoid leftover data from previous iterations
+           MOVE SPACES TO CLEAN-RECORD
 
-           STRING FUNCTION TRIM(WS-FIELD1) WS-TAB
-                  FUNCTION TRIM(WS-FIELD2) WS-TAB
-                  FUNCTION TRIM(WS-FIELD3) WS-TAB
-                  FUNCTION TRIM(WS-FIELD4)
-               DELIMITED BY SIZE INTO CLEAN-RECORD
+           *> Concatenate fields into TSV format with proper trimming and spacing
+           STRING FUNCTION TRIM(WS-FIELD1) DELIMITED BY SIZE,
+                  WS-TAB DELIMITED BY SIZE,
+                  FUNCTION TRIM(WS-FIELD2) DELIMITED BY SIZE,
+                  WS-TAB DELIMITED BY SIZE,
+                  FUNCTION TRIM(WS-FIELD3) DELIMITED BY SIZE,
+                  WS-TAB DELIMITED BY SIZE,
+                  FUNCTION TRIM(WS-FIELD4) DELIMITED BY SIZE
+               INTO CLEAN-RECORD
 
+           *> Write the cleaned record to the output file using CLEAN-RECORD (defined in FD)
            WRITE CLEAN-RECORD.
 
