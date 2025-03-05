@@ -9,6 +9,7 @@ module "vpc" {
   create_database_subnet_group                    = true
   create_flow_log_cloudwatch_iam_role             = true
   create_flow_log_cloudwatch_log_group            = true
+  database_subnet_group_name                      = local.environment
   database_subnets                                = local.database_subnets
   enable_dhcp_options                             = true
   enable_dns_hostnames                            = true

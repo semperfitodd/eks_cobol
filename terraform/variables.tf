@@ -65,5 +65,5 @@ variable "vpc_redundancy" {
   description = "Redundancy for this VPCs NAT gateways"
   type        = bool
 
-  default = true
+  default = false
 }
