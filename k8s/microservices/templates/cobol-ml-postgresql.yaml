@@ -58,3 +58,4 @@ spec:
       key: POSTGRES_USER
     - objectName: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
       key: POSTGRES_PASSWORD
+  syncSecret: true
