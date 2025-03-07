@@ -2,6 +2,33 @@ data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
   name = "AmazonSSMManagedInstanceCore"
 }
 
+module "ebs_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name             = "${var.environment}_ebs_csi"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
+
+module "efs_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name             = "${var.environment}_efs_csi"
+  attach_efs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["system:serviceaccount:kube-system:efs-csi-*"]
+    }
+  }
+}
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.31.6"
@@ -142,20 +169,6 @@ module "eks" {
   }
 }
 
-module "ebs_csi_irsa_role" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-
-  role_name             = "${var.environment}_ebs_csi"
-  attach_ebs_csi_policy = true
-
-  oidc_providers = {
-    ex = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
-    }
-  }
-}
-
 module "secrets_csi_irsa_role" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
@@ -165,21 +178,8 @@ module "secrets_csi_irsa_role" {
   oidc_providers = {
     ex = {
       provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:cobolml-postgres-sa"]
+      namespace_service_accounts = ["cobol-ml:cobolml-postgres-sa"]
     }
   }
 }
 
-module "efs_csi_irsa_role" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-
-  role_name             = "${var.environment}_efs_csi"
-  attach_efs_csi_policy = true
-
-  oidc_providers = {
-    ex = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["system:serviceaccount:kube-system:efs-csi-*"]
-    }
-  }
-}
