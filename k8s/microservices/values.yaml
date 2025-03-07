@@ -152,7 +152,7 @@ cobolmlpostgresql:
   enabled: true
   serviceAccount:
     name: cobolml-postgres-sa
-    namespace: kube-system
+    namespace: cobol-ml
   pod:
     name: cobolml-postgres-pod
     namespace: cobol-ml
