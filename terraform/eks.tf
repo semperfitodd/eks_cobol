@@ -30,6 +30,9 @@ module "eks" {
     kube-proxy = {
       most_recent = true
     }
+    metrics-server = {
+      most_recent = true
+    }
     vpc-cni = {
       most_recent    = true
       before_compute = true
@@ -149,6 +152,20 @@ module "ebs_csi_irsa_role" {
     ex = {
       provider_arn               = module.eks.oidc_provider_arn
       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+}
+
+module "secrets_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+
+  role_name                      = "${var.environment}_secrets_csi"
+  attach_external_secrets_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:cobolml-postgres-sa"]
     }
   }
 }

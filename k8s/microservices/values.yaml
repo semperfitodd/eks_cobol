@@ -147,3 +147,21 @@ llm:
   environment:
     TRANSFORMED_FILE: "/mnt/efs/output/transformed_orders.txt"
     LLM_TRANSFORMED_FILE: "/mnt/efs/output/llm_transformed_orders.txt"
+
+cobolmlpostgresql:
+  enabled: true
+  serviceAccount:
+    name: cobolml-postgres-sa
+    namespace: kube-system
+  pod:
+    name: cobolml-postgres-pod
+    namespace: cobol-ml
+    image: ubuntu:latest
+  secret:
+    name: cobolml-postgres-secret
+    secretName: rds!cluster-cc1fc0e8-a7ca-4430-b2df-5f94dd24e692
+    userKey: username
+    passwordKey: password
+  secretProviderClass:
+    name: aws-secrets-provider
+

@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.cobolmlpostgresql.serviceAccount.name }}
+  namespace: {{ .Values.cobolmlpostgresql.serviceAccount.namespace }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Values.cobolmlpostgresql.pod.name }}
+  namespace: {{ .Values.cobolmlpostgresql.pod.namespace }}
+spec:
+  serviceAccountName: {{ .Values.cobolmlpostgresql.serviceAccount.name }}
+  containers:
+  - name: {{ .Values.cobolmlpostgresql.pod.name }}
+    image: {{ .Values.cobolmlpostgresql.pod.image }}
+    volumeMounts:
+    - name: secrets-store-inline
+      mountPath: "/mnt/secrets-store"
+      readOnly: true
+    env:
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.cobolmlpostgresql.secret.name }}
+          key: {{ .Values.cobolmlpostgresql.secret.userKey }}
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.cobolmlpostgresql.secret.name }}
+          key: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
+  volumes:
+  - name: secrets-store-inline
+    csi:
+      driver: secrets-store.csi.k8s.io
+      readOnly: true
+      volumeAttributes:
+        secretProviderClass: {{ .Values.cobolmlpostgresql.secretProviderClass.name }}
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: {{ .Values.cobolmlpostgresql.secretProviderClass.name }}
+  namespace: {{ .Values.cobolmlpostgresql.serviceAccount.namespace }}
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: {{ .Values.cobolmlpostgresql.secret.secretName }}
+        objectType: secretsmanager
+  secretObjects:
+  - secretName: {{ .Values.cobolmlpostgresql.secret.name }}
+    type: Opaque
+    data:
+    - objectName: {{ .Values.cobolmlpostgresql.secret.userKey }}
+      key: POSTGRES_USER
+    - objectName: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
+      key: POSTGRES_PASSWORD

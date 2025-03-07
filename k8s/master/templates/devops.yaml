@@ -19,6 +19,7 @@ spec:
     - oci://registry-1.docker.io/bitnamicharts
     - https://charts.jetstack.io/
     - https://nvidia.github.io/k8s-device-plugin
+    - https://aws.github.io/secrets-store-csi-driver-provider-aws
     - {{ $values.repoUrl }}
 ---
 apiVersion: argoproj.io/v1alpha1
