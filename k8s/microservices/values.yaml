@@ -161,7 +161,7 @@ cobolmlpostgresql:
     image: ubuntu:latest
   secret:
     name: cobolml-postgres-secret
-    secretName: rds!cluster-cc1fc0e8-a7ca-4430-b2df-5f94dd24e692
+    secretName: csi_test
     userKey: username
     passwordKey: password
   secretProviderClass:
