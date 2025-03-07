@@ -4,6 +4,8 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.17.0"
 
+  name = var.environment
+
   azs                                             = local.availability_zones
   cidr                                            = var.vpc_cidr
   create_database_subnet_group                    = true
@@ -18,10 +20,10 @@ module "vpc" {
   enable_nat_gateway                              = true
   flow_log_cloudwatch_log_group_retention_in_days = 7
   flow_log_max_aggregation_interval               = 60
-  name                                            = var.environment
   one_nat_gateway_per_az                          = var.vpc_redundancy ? true : false
-  private_subnet_suffix                           = "private"
-  private_subnets                                 = local.private_subnets
+
+  private_subnet_suffix = "private"
+  private_subnets       = local.private_subnets
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = 1
   }
@@ -33,7 +35,8 @@ module "vpc" {
   }
 
   single_nat_gateway = var.vpc_redundancy ? false : true
-  tags               = var.tags
+
+  tags = var.tags
 }
 
 module "vpc_endpoints" {
