@@ -16,6 +16,8 @@ spec:
   containers:
   - name: {{ .Values.cobolmlpostgresql.pod.name }}
     image: {{ .Values.cobolmlpostgresql.pod.image }}
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; do sleep 30; done;" ]
     volumeMounts:
     - name: secrets-store-inline
       mountPath: "/mnt/secrets-store"
