@@ -50,12 +50,17 @@ spec:
     objects: |
       - objectName: {{ .Values.cobolmlpostgresql.secret.secretName }}
         objectType: secretsmanager
+        jmesPath:
+          - path: "username"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
+          - path: "password"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
   secretObjects:
   - secretName: {{ .Values.cobolmlpostgresql.secret.name }}
     type: Opaque
     data:
-    - objectName: {{ .Values.cobolmlpostgresql.secret.userKey }}
-      key: username
-    - objectName: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
-      key: password
-  syncSecret: true
+    - objectName: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
+      key: POSTGRES_USER
+    - objectName: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
+      key: POSTGRES_PASSWORD
+
