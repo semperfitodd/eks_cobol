@@ -153,6 +153,8 @@ cobolmlpostgresql:
   serviceAccount:
     name: cobolml-postgres-sa
     namespace: cobol-ml
+  iamRole:
+    name: eks_cobol_secrets_csi
   pod:
     name: cobolml-postgres-pod
     namespace: cobol-ml

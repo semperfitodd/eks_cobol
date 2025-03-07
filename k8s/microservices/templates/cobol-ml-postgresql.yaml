@@ -3,6 +3,8 @@ kind: ServiceAccount
 metadata:
   name: {{ .Values.cobolmlpostgresql.serviceAccount.name }}
   namespace: {{ .Values.cobolmlpostgresql.serviceAccount.namespace }}
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::{{ .Values.awsAccountNumber }}:role/{{ .Values.cobolmlpostgresql.iamRole.name }}
 ---
 apiVersion: v1
 kind: Pod
