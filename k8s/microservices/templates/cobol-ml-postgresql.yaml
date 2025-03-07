@@ -55,7 +55,7 @@ spec:
     type: Opaque
     data:
     - objectName: {{ .Values.cobolmlpostgresql.secret.userKey }}
-      key: POSTGRES_USER
+      key: username
     - objectName: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
-      key: POSTGRES_PASSWORD
+      key: password
   syncSecret: true
