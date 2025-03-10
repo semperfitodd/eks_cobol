@@ -57,6 +57,8 @@ spec:
             objectAlias: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
           - path: "password"
             objectAlias: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
+          - path: "connection_endpoint"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
   secretObjects:
   - secretName: {{ .Values.cobolmlpostgresql.secret.name }}
     type: Opaque
@@ -65,4 +67,6 @@ spec:
       key: username
     - objectName: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
       key: password
+    - objectName: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
+      key: connection_name
 

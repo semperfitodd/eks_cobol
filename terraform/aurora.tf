@@ -76,7 +76,7 @@ resource "aws_secretsmanager_secret_version" "rds_credentials" {
   secret_id = aws_secretsmanager_secret.rds_credentials.id
   secret_string = jsonencode(
     {
-      connection_endpoing = module.postgresql.cluster_endpoint
+      connection_endpoint = module.postgresql.cluster_endpoint
       password            = module.postgresql.cluster_master_password
       username            = module.postgresql.cluster_master_username
     }
