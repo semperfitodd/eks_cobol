@@ -61,6 +61,25 @@ cobolmlingestdata:
     storageClassName: efs-sc
     volumeHandle: fs-0b11c021faf9e5922:/
 
+cobolmlpostgresql:
+  enabled: true
+  serviceAccount:
+    name: cobolml-postgres-sa
+    namespace: cobol-ml
+  iamRole:
+    name: eks_cobol_secrets_csi
+  pod:
+    name: cobolml-postgres-pod
+    namespace: cobol-ml
+    image: ubuntu:latest
+  secret:
+    name: cobolml-postgres-secret
+    secretName: eks-cobol-aurora-serverless
+    userKey: username
+    passwordKey: password
+  secretProviderClass:
+    name: aws-secrets-provider
+
 cobolmlrawdata:
   name: cobol-ml-raw-data
   namespace: cobol-ml
@@ -146,24 +165,4 @@ llm:
 
   environment:
     TRANSFORMED_FILE: "/mnt/efs/output/transformed_orders.txt"
-    LLM_TRANSFORMED_FILE: "/mnt/efs/output/llm_transformed_orders.txt"
-
-cobolmlpostgresql:
-  enabled: true
-  serviceAccount:
-    name: cobolml-postgres-sa
-    namespace: cobol-ml
-  iamRole:
-    name: eks_cobol_secrets_csi
-  pod:
-    name: cobolml-postgres-pod
-    namespace: cobol-ml
-    image: ubuntu:latest
-  secret:
-    name: cobolml-postgres-secret
-    secretName: rds!cluster-cc1fc0e8-a7ca-4430-b2df-5f94dd24e692
-    userKey: username
-    passwordKey: password
-  secretProviderClass:
-    name: aws-secrets-provider
-
+    LLM_TRANSFOÚRMED_FILE: "/mnt/efs/output/llm_transformed_orders.txt"

@@ -2,10 +2,8 @@ domain = "brewsentry.com"
 
 ecr_repos = {
   cobol_0                   = "cobol_0",
-  cobol_ml_cobol_cleanup    = "cobol_ml_cobol_cleanup",
-  cobol_ml_cobol_enrichment = "cobol_ml_cobol_enrichment",
   cobol_ml_cobol_ingestion  = "cobol_ml_cobol_ingestion",
-  cobol_ml_cobol_process    = "cobol_ml_cobol_process",
+  cobol_ml_cobol_postgresql = "cobol_ml_cobol_postgresql",
   cobol_ml_raw_generator    = "cobol_ml_raw_generator",
   deepseek                  = "deepseek",
   llm                       = "llm"

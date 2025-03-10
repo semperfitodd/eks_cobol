@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY ProcessTSV.cbl /app/
+COPY PostgreSQL.cbl /app/
 COPY run.sh /app/
 
 RUN chmod +x /app/run.sh

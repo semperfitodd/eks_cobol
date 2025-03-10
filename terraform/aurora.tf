@@ -4,23 +4,22 @@ module "postgresql" {
 
   name = local.environment
 
-  apply_immediately                                      = true
-  copy_tags_to_snapshot                                  = true
-  create_monitoring_role                                 = true
-  database_name                                          = replace(local.environment, "-", "")
-  db_cluster_parameter_group_name                        = aws_rds_cluster_parameter_group.this.name
-  db_subnet_group_name                                   = module.vpc.database_subnet_group
-  deletion_protection                                    = true
-  engine                                                 = "aurora-postgresql"
-  engine_mode                                            = "provisioned"
-  engine_version                                         = "16.6"
-  iam_database_authentication_enabled                    = true
-  manage_master_user_password                            = true
-  manage_master_user_password_rotation                   = true
-  master_user_password_rotation_automatically_after_days = 30
-  master_username                                        = "postgres"
-  publicly_accessible                                    = false
-  storage_encrypted                                      = true
+  apply_immediately                   = true
+  copy_tags_to_snapshot               = true
+  create_monitoring_role              = true
+  database_name                       = replace(local.environment, "-", "")
+  db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.this.name
+  db_subnet_group_name                = module.vpc.database_subnet_group
+  deletion_protection                 = true
+  engine                              = "aurora-postgresql"
+  engine_mode                         = "provisioned"
+  engine_version                      = "16.6"
+  iam_database_authentication_enabled = true
+  master_username                     = "postgres"
+  manage_master_user_password = false
+  master_password                     = random_password.password.result
+  publicly_accessible                 = false
+  storage_encrypted                   = true
 
   subnets = module.vpc.database_subnets
   vpc_id  = module.vpc.vpc_id
@@ -59,4 +58,29 @@ resource "aws_rds_cluster_parameter_group" "this" {
     name  = "rds.force_ssl"
     value = "1"
   }
+}
+
+resource "random_password" "password" {
+  length = 16
+}
+
+resource "aws_secretsmanager_secret" "rds_credentials" {
+  name                    = "${local.environment}-aurora-serverless"
+  description             = "${local.environment} aurora secrets"
+  recovery_window_in_days = "7"
+
+  depends_on = [module.postgresql]
+}
+
+resource "aws_secretsmanager_secret_version" "rds_credentials" {
+  secret_id = aws_secretsmanager_secret.rds_credentials.id
+  secret_string = jsonencode(
+    {
+      connection_endpoing = module.postgresql.cluster_endpoint
+      password            = module.postgresql.cluster_master_password
+      username            = module.postgresql.cluster_master_username
+    }
+  )
+
+  depends_on = [module.postgresql]
 }
