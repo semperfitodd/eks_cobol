@@ -37,7 +37,7 @@ spec:
       valueFrom:
         secretKeyRef:
           name: {{ .Values.cobolmlpostgresql.secret.name }}
-          key: {{ .Values.cobolmlpostgresql.secret.connectionEndpointKeyKey }}
+          key: {{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}
   volumes:
   - name: secrets-store-inline
     csi:
