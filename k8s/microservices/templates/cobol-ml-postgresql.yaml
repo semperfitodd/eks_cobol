@@ -23,21 +23,26 @@ spec:
       mountPath: "/mnt/secrets-store"
       readOnly: true
     env:
-    - name: POSTGRES_USER
-      valueFrom:
-        secretKeyRef:
-          name: {{ .Values.cobolmlpostgresql.secret.name }}
-          key: {{ .Values.cobolmlpostgresql.secret.userKey }}
-    - name: POSTGRES_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: {{ .Values.cobolmlpostgresql.secret.name }}
-          key: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
     - name: POSTGRES_CONNECTION_ENDPOINT
       valueFrom:
         secretKeyRef:
           name: {{ .Values.cobolmlpostgresql.secret.name }}
           key: {{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}
+    - name: POSTGRES_DATABASE_NAME
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.cobolmlpostgresql.secret.name }}
+          key: {{ .Values.cobolmlpostgresql.secret.databaseNameKey }}
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.cobolmlpostgresql.secret.name }}
+          key: {{ .Values.cobolmlpostgresql.secret.passwordKey }}
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.cobolmlpostgresql.secret.name }}
+          key: {{ .Values.cobolmlpostgresql.secret.userKey }}
   volumes:
   - name: secrets-store-inline
     csi:
@@ -58,20 +63,23 @@ spec:
       - objectName: {{ .Values.cobolmlpostgresql.secret.secretName }}
         objectType: secretsmanager
         jmesPath:
-          - path: "username"
-            objectAlias: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
-          - path: "password"
-            objectAlias: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
           - path: "connection_endpoint"
             objectAlias: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
+          - path: "database_name"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.databaseNameKey }}"
+          - path: "password"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
+          - path: "username"
+            objectAlias: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
   secretObjects:
   - secretName: {{ .Values.cobolmlpostgresql.secret.name }}
     type: Opaque
     data:
-    - objectName: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
-      key: username
-    - objectName: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
-      key: password
     - objectName: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
       key: connection_endpoint
-
+    - objectName: "{{ .Values.cobolmlpostgresql.secret.databaseNameKey }}"
+      key: database_name
+    - objectName: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
+      key: password
+    - objectName: "{{ .Values.cobolmlpostgresql.secret.userKey }}"
+      key: username

@@ -16,7 +16,7 @@ module "postgresql" {
   engine_version                      = "16.6"
   iam_database_authentication_enabled = true
   master_username                     = "postgres"
-  manage_master_user_password = false
+  manage_master_user_password         = false
   master_password                     = random_password.password.result
   publicly_accessible                 = false
   storage_encrypted                   = true
@@ -77,6 +77,7 @@ resource "aws_secretsmanager_secret_version" "rds_credentials" {
   secret_string = jsonencode(
     {
       connection_endpoint = module.postgresql.cluster_endpoint
+      database_name       = module.postgresql.cluster_database_name
       password            = module.postgresql.cluster_master_password
       username            = module.postgresql.cluster_master_username
     }
