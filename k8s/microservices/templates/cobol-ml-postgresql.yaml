@@ -73,5 +73,5 @@ spec:
     - objectName: "{{ .Values.cobolmlpostgresql.secret.passwordKey }}"
       key: password
     - objectName: "{{ .Values.cobolmlpostgresql.secret.connectionEndpointKey }}"
-      key: connection_name
+      key: connection_endpoint
 
