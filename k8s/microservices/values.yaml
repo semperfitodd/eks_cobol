@@ -74,7 +74,7 @@ cobolmlpostgresql:
     image: ubuntu:latest
   secret:
     name: cobolml-postgres-secret
-    databaseName: database_name
+    databaseNameKey: database_name
     connectionEndpointKey: connection_endpoint
     passwordKey: password
     secretName: eks-cobol-aurora-serverless
