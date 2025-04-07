@@ -10,7 +10,7 @@ module "postgresql" {
   database_name                       = replace(local.environment, "-", "")
   db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.this.name
   db_subnet_group_name                = module.vpc.database_subnet_group
-  deletion_protection                 = true
+  deletion_protection                 = false
   engine                              = "aurora-postgresql"
   engine_mode                         = "provisioned"
   engine_version                      = "16.6"
