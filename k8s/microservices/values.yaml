@@ -6,7 +6,7 @@ global:
         - ReadWriteMany
       reclaimPolicy: Retain
       storageClassName: efs-sc
-    volumeHandle: fs-0fc5ab66fd9f3152c:/
+    volumeHandle: fs-094540cb19b7db04a:/
 
   efs_cobol_ml:
     storage:
@@ -15,10 +15,10 @@ global:
         - ReadWriteMany
       reclaimPolicy: Retain
       storageClassName: efs-sc
-    volumeHandle: fs-09d89069bfa59f153:/
+    volumeHandle: fs-04c09302a3f6bc74a:/
 
   s3:
-    bucketName: eks-cobol-logs-hdb3f3
+    bucketName: eks-cobol-logs-loa5xe
     storage:
       size: 100Gi
       accessModes:
@@ -27,7 +27,7 @@ global:
       storageClassName: s3-sc
 
   secret:
-    name: eks-cobol-aurora-serverless-hdb3f3
+    name: eks-cobol-aurora-serverless-loa5xe
 
 cobol0:
   environment:
@@ -80,8 +80,11 @@ cobolmllogspreprocess:
     name: eks_cobol_secrets_csi
   image:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_logs_preprocess"
-    tag: "1"
+    tag: "0"
     pullPolicy: Always
+    
+  nodeSelector:
+    gpu: 'false'
 
   name: cobol-ml-logs-preprocess
   namespace: cobol-ml
@@ -96,6 +99,8 @@ cobolmlpostgresql:
     repository: "704855531002.dkr.ecr.us-east-1.amazonaws.com/eks_cobol/cobol_ml_postgresql"
     tag: "0"
     pullPolicy: Always
+  nodeSelector:
+    gpu: 'false'
 
   name: cobol-ml-postgres
   namespace: cobol-ml
@@ -170,7 +175,7 @@ llm:
 
   name: llm
   nodeSelector:
-    gpu: "false"
+    gpu: 'false'
 
   resources:
     requests:
@@ -199,7 +204,7 @@ workercobol0:
       memory: "256Mi"
 
   nodeSelector:
-    gpu: "false"
+    gpu: 'false'
 
 workercobolml:
   name: cobol-ml-worker
@@ -218,4 +223,4 @@ workercobolml:
       memory: "256Mi"
 
   nodeSelector:
-    gpu: "false"
+    gpu: 'false'

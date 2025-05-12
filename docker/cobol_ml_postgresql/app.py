@@ -52,6 +52,17 @@ def parse_line(line):
     description = " ".join(parts[1:-1])
     return date, description, float(amount)
 
+# Ensure the target table exists
+def ensure_table_exists(cursor):
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transactions (
+            id SERIAL PRIMARY KEY,
+            transaction_date DATE NOT NULL,
+            description TEXT NOT NULL,
+            amount NUMERIC NOT NULL
+        )
+    """)
+
 # Process and insert file contents into DB
 def insert_file(cursor, filepath):
     inserted = 0
@@ -88,6 +99,8 @@ def main():
     conn.autocommit = True
     cursor = conn.cursor()
 
+    ensure_table_exists(cursor)
+
     files = sorted(
         f for f in os.listdir(DATA_DIR)
         if f.endswith(".tsv") and os.path.isfile(os.path.join(DATA_DIR, f))
@@ -113,7 +126,6 @@ def main():
     cursor.close()
     conn.close()
 
-    # Final check of remaining files
     remaining = sorted(
         f for f in os.listdir(DATA_DIR)
         if f.endswith(".tsv") and os.path.isfile(os.path.join(DATA_DIR, f))

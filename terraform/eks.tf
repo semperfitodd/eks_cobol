@@ -175,6 +175,8 @@ module "eks" {
       tags = var.tags
     }
   }
+
+  depends_on = [module.vpc.nat_ids]
 }
 
 module "s3_csi_irsa_role" {

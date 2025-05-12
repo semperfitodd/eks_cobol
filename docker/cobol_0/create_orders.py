@@ -1,6 +1,6 @@
+import os
 import csv
 import random
-import string
 
 def fixed_width(s, width):
     return s[:width].ljust(width)
@@ -9,6 +9,10 @@ first_names = ["John", "Jane", "Mike", "Alice", "Chris", "Karen", "Bob", "Susan"
 last_names = ["Smith", "Doe", "Johnson", "Brown", "Green", "Miller", "Wilson", "Clark", "Adams", "Davis", "Harris", "Allen", "Wright", "Hall", "Young", "King", "Scott", "Turner", "Evans", "Moore"]
 streets = ["Main St", "Oak Ave", "Elm St", "Pine Rd", "Maple Ln", "Birch Blvd", "Cedar Way", "Spruce Ct", "Ash Dr", "Cherry Cir", "Walnut Pl", "Willow Pkwy", "Redwood Blvd", "Fir Ln", "Hickory Ave", "Chestnut St", "Magnolia Dr", "Cypress Rd", "Juniper Trl", "Sequoia Way"]
 items = ["Widget", "Gadget", "Toolset", "Gearbox", "Wrench", "Sawblade", "Drill", "Hammer", "Tape", "Glue", "Level", "BoltSet", "Plier", "Clamp", "Router", "Sander", "Chisel", "BitKit", "HexSet", "Socket"]
+
+# Ensure directories exist
+os.makedirs("input", exist_ok=True)
+os.makedirs("output", exist_ok=True)
 
 with open("input/orders.csv", "w", newline='') as csvfile:
     writer = csv.writer(csvfile)

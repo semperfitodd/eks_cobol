@@ -15,7 +15,7 @@ helm search repo argo-cd
 ```bash
 k create ns argocd
 
-helm install argo-cd argo/argo-cd --namespace argocd_initial_start --values config.yaml
+helm install argo-cd argo/argo-cd --namespace argocd --values config.yaml
 ```
 
 or
@@ -23,7 +23,7 @@ or
 ## Upgrade to the most recent version
 ```bash
 helm upgrade --install argo-cd argo/argo-cd --version <CHART_VERSION> \
-  --values config.yaml --namespace argocd_initial_start --wait --timeout 900s
+  --values config.yaml --namespace argocd --wait --timeout 900s
 ```
 
 ## Install master chart

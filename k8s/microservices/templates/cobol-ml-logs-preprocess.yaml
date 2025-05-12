@@ -12,6 +12,8 @@ spec:
         spec:
           serviceAccountName: {{ .Values.cobolmlpostgresql.name }}-sa
           restartPolicy: OnFailure
+          nodeSelector:
+            gpu: {{ .Values.cobolmllogspreprocess.nodeSelector.gpu | quote }}
           containers:
           - name: {{ .Values.cobolmllogspreprocess.name }}
             image: "{{ .Values.cobolmllogspreprocess.image.repository }}:{{ .Values.cobolmllogspreprocess.image.tag }}"

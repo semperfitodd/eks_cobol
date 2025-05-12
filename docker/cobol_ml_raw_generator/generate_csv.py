@@ -38,6 +38,9 @@ def generate_transaction():
 def generate_csv(file_name):
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
+    # Ensure the ingested-data directory exists
+    os.makedirs('/output/ingested-data/', exist_ok=True)
+
     target_size = random.randint(100 * 1024 * 1024, 1024 * 1024 * 1024)
 
     with open(file_name, mode='w', newline='', encoding='utf-8') as file:
